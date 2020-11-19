@@ -1,0 +1,7 @@
+
+# ide
+.idea/
+
+# build
+bin/
+.gradle/
