@@ -27,7 +27,7 @@ dependencies {
     // data, migration
     implementation 'org.flywaydb:flyway-core:5.1.4'
     // data, test
-    testImplementation 'com.h2database:h2:1.4.200'
+    runtime 'com.h2database:h2:1.4.200'
     // data, test
 //    implementation 'org.slf4j:slf4j-nop:1.7.30'
     // <- maria
