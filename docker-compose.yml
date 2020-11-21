@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  data-maria:
+    image: mariadb:10
+    ports:
+      - "3306:3306"
+    networks:
+      - dev-network
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - dev-network
+    depends_on:
+      - data-maria
+
+networks:
+  dev-network:
