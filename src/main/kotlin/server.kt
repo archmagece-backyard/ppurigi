@@ -27,13 +27,13 @@ fun main() {
             }
             route("/ppurigi") {
                 post("/scatter") {
-                    call.respond(HttpStatusCode.Created, "")
+                    call.respond(HttpStatusCode.Created, "scatter")
                 }
                 post("/gather") {
-                    call.respond(HttpStatusCode.Accepted, "")
+                    call.respond(HttpStatusCode.Accepted, "gather")
                 }
                 get("/inspection/{token}") {
-                    call.respond(HttpStatusCode.OK, "")
+                    call.respond(HttpStatusCode.OK, "inspection")
                 }
             }
         }
