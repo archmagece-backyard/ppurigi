@@ -18,18 +18,25 @@ repositories {
 dependencies {
     // test
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+    testImplementation "io.ktor:ktor-server-test-host:$ktor_version"
 
+    // datasource
+    implementation 'com.zaxxer:HikariCP:3.4.5'
     // data
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.0'
+    // data, migration
+    implementation 'org.flywaydb:flyway-core:5.1.4'
     // data, test
     testImplementation 'com.h2database:h2:1.4.200'
     // data, test
-    implementation 'org.slf4j:slf4j-nop:1.7.30'
+//    implementation 'org.slf4j:slf4j-nop:1.7.30'
     // <- maria
     implementation 'com.google.guava:guava:22.0'
 
     // ktor
     implementation "io.ktor:ktor-server-core:$ktor_version"
+    implementation "io.ktor:ktor-gson:$ktor_version"
+    implementation "io.ktor:ktor-metrics:$ktor_version"
     implementation "io.ktor:ktor-server-netty:$ktor_version"
     implementation "io.ktor:ktor-websockets:$ktor_version"
     implementation "io.ktor:ktor-auth:$ktor_version"
@@ -38,7 +45,9 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.2'
 
     // logger
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
+//    implementation 'ch.qos.logback:logback-classic:1.2.3'
+//    implementation 'io.github.microutils:kotlin-logging:1.12.0'
+    implementation 'io.github.microutils:kotlin-logging-jvm:2.0.2'
 
     implementation 'org.apache.commons:commons-lang3:3.1'
 
