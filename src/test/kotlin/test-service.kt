@@ -22,6 +22,7 @@ class TestService {
             useNestedTransactions = true
         }
         transaction {
+            SchemaUtils.dropSchema()
             SchemaUtils.create (Scatter, Treasure, Hunter)
         }
     }
@@ -30,9 +31,10 @@ class TestService {
     fun `ppurigi service test`() {
         val pRoomId = 1L
         val pUserId = 1L
-        val rToken = scatter(pRoomId, pUserId, 10000, 3)
-        gather(pRoomId, pUserId, rToken)
-        inspect(rToken, pRoomId, pUserId)
+        val ppurigiService = PpurigiService()
+        val rToken = ppurigiService.scatter(pRoomId, pUserId, 10000, 3)
+        ppurigiService.gather(pRoomId, pUserId, rToken)
+        ppurigiService.inspect(pRoomId, pUserId, rToken)
     }
 
 }

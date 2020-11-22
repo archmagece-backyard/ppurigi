@@ -1,11 +1,13 @@
 import com.google.gson.Gson
-import handler.GatherRequest
-import handler.ScatterRequest
+import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import mu.KotlinLogging
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.Test
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -16,11 +18,14 @@ class TestHttp {
 
     @Test
     fun call_scatter() = ppurigiServer {
-        logger.debug { "Running Ppurigi Test" }
+        SchemaUtils.dropSchema()
+        val roomId = 1
+        val userId = 1
+        logger.debug { "Running Ppurigi Http Test" }
         handleRequest(HttpMethod.Post, "/ppurigi/scatter") {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            addHeader("X-ROOM-ID", 1.toString())
-            addHeader("X-USER-ID", 1.toString())
+            addHeader("X-ROOM-ID", roomId.toString())
+            addHeader("X-USER-ID", userId.toString())
             setBody(
                 gson.toJson(
                     ScatterRequest(
@@ -31,17 +36,21 @@ class TestHttp {
             )
         }.apply {
             assertEquals(HttpStatusCode.Created, response.status())
-            handleRequest(HttpMethod.Post, "/ppurigi/gather") {
-                addHeader("X-ROOM-ID", 1.toString())
-                addHeader("X-USER-ID", 2.toString())
+            val turnsType = object : TypeToken<ResponseWrapper<ScatterResponse>>() {}.type
+            val scatterResponse = gson.fromJson<ResponseWrapper<ScatterResponse>>(response.content, turnsType)
+            val token = scatterResponse.data.token
+            handleRequest(HttpMethod.Post, "/ppurigi/gather/$token") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                addHeader("X-ROOM-ID", roomId.toString())
+                addHeader("X-USER-ID", userId.toString())
             }.apply {
                 assertEquals(HttpStatusCode.Accepted, response.status())
                 assertNotNull(response.content)
             }
-            val token = "AAA"
             handleRequest(HttpMethod.Get, "/ppurigi/inspection/$token") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                addHeader("X-ROOM-ID", roomId.toString())
+                addHeader("X-USER-ID", userId.toString())
                 setBody(
                     gson.toJson(
                         GatherRequest(

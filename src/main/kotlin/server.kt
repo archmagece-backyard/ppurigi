@@ -11,6 +11,8 @@ import io.ktor.routing.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.event.Level
 import java.lang.reflect.Modifier
 import java.text.DateFormat
@@ -29,6 +31,9 @@ fun initDB() {
     val hikariConfig = HikariConfig(properties)
     val ds = HikariDataSource(hikariConfig)
     Database.connect(ds)
+    transaction {
+        SchemaUtils.create(Scatter, Treasure, Hunter)
+    }
 }
 
 fun dbMigrate() {
@@ -39,7 +44,7 @@ fun Application.module() {
     install(Compression)
     install(DefaultHeaders)
     install(CallLogging) {
-        filter { call -> !call.request.path().startsWith("/employee-api/health") }
+        filter { call -> !call.request.path().startsWith("/ppurigi/health") }
         level = Level.TRACE
         mdc("executionId") {
             UUID.randomUUID().toString()
@@ -52,14 +57,6 @@ fun Application.module() {
             excludeFieldsWithModifiers(Modifier.TRANSIENT)
         }
     }
-
-//    install(DropwizardMetrics) {
-//        JmxReporter.forRegistry(registry)
-//            .convertRatesTo(TimeUnit.SECONDS)
-//            .convertDurationsTo(TimeUnit.MILLISECONDS)
-//            .build()
-//            .start()
-//    }
     install(DropwizardMetrics) {
         Slf4jReporter.forRegistry(registry)
             .outputTo(log)
@@ -70,11 +67,13 @@ fun Application.module() {
     }
 
     initConfig()
-//    dbMigrate()
+    dbMigrate()
     initDB()
 
+    val ppurigiService = PpurigiService()
+
     install(Routing) {
-        ppurigi()
+        ppurigi(ppurigiService)
     }
 }
 
