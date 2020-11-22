@@ -1,13 +1,13 @@
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
+import io.ktor.config.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import mu.KotlinLogging
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.Test
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -18,7 +18,9 @@ class TestHttp {
 
     @Test
     fun call_scatter() = ppurigiServer {
-        SchemaUtils.dropSchema()
+        transaction {
+            SchemaUtils.create(Scatter, Treasure, Hunter)
+        }
         val roomId = 1
         val userId = 1
         logger.debug { "Running Ppurigi Http Test" }

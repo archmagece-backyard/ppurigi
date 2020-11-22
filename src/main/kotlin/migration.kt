@@ -14,7 +14,7 @@ object DBMigration {
             config.getString("dataSource.user"),
             config.getString("dataSource.password"),
         )
-        flyway.setSchemas("t_scatter", "t_treasure", "t_gather")
+        flyway.setSchemas("t_scatter", "t_treasure", "t_hunter")
         flyway.setLocations("db/migration/$dbType")
         flyway.migrate()
     }

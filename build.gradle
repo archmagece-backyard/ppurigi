@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
     id 'application'
+    id 'java'
 }
 group = 'me.kakaopay'
 version = '1.0-SNAPSHOT'
@@ -20,6 +21,11 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
     testImplementation "io.ktor:ktor-server-test-host:$ktor_version"
 
+    // test, container
+    testImplementation "org.testcontainers:testcontainers:$testcontainer_version"
+    testImplementation "org.testcontainers:mariadb:$testcontainer_version"
+//    testImplementation 'org.apache.commons:commons-lang:2.6'
+
     // datasource
     implementation 'com.zaxxer:HikariCP:3.4.5'
     // data
@@ -27,7 +33,7 @@ dependencies {
     // data, migration
     implementation 'org.flywaydb:flyway-core:5.1.4'
     // data, test
-    runtime 'com.h2database:h2:1.4.200'
+    testRuntime 'com.h2database:h2:1.4.200'
     // data, test
 //    implementation 'org.slf4j:slf4j-nop:1.7.30'
     // <- maria
@@ -59,6 +65,11 @@ dependencies {
     implementation "org.jetbrains.exposed:exposed-money:$exposed_version"
     implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
 }
+//sourceSets {
+//    main.java.srcDirs = []
+//    main.kotlin.srcDirs = ['src/main/java', 'src/main/kotlin']
+//    main.resources.srcDirs = ['src/main/resources']
+//}
 compileKotlin {
     kotlinOptions.jvmTarget = '11'
 }

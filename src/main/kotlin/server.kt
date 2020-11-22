@@ -1,14 +1,17 @@
 import com.codahale.metrics.Slf4jReporter
+import com.google.common.annotations.VisibleForTesting
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.application.*
+import io.ktor.config.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.metrics.dropwizard.*
 import io.ktor.request.*
 import io.ktor.routing.*
-import io.ktor.server.engine.embeddedServer
+import io.ktor.server.engine.*
 import io.ktor.server.netty.Netty
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -19,21 +22,19 @@ import java.text.DateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-fun initConfig() {
-    ConfigFactory.defaultApplication()
-}
+fun initConfig() = ConfigFactory.defaultApplication() ?: throw NullPointerException("init error on server.kt")
 
-fun initDB() {
-    val dbType = ConfigFactory.load().getString("db_type")
-    val config = ConfigFactory.load().getConfig(dbType)
-    val properties = Properties()
-    config.entrySet().forEach { e -> properties.setProperty(e.key, config.getString(e.key)) }
-    val hikariConfig = HikariConfig(properties)
-    val ds = HikariDataSource(hikariConfig)
-    Database.connect(ds)
-    transaction {
-        SchemaUtils.create(Scatter, Treasure, Hunter)
+fun initDB(config: Config) {
+    ConfigFactory.load().withFallback(config).apply {
+        val dbType = getString("db_type")
+        val config = getConfig(dbType)
+        val hikariConfig = HikariConfig(Properties().apply {
+            config.entrySet().forEach { e -> setProperty(e.key, config.getString(e.key)) }
+        })
+        val ds = HikariDataSource(hikariConfig)
+        Database.connect(ds)
     }
+
 }
 
 fun dbMigrate() {
@@ -66,9 +67,8 @@ fun Application.module() {
             .start(10, TimeUnit.SECONDS)
     }
 
-    initConfig()
-    dbMigrate()
-    initDB()
+    initDB(initConfig())
+//    dbMigrate()
 
     val ppurigiService = PpurigiService()
 
@@ -77,6 +77,8 @@ fun Application.module() {
     }
 }
 
+
 fun main() {
+    System.setProperty("testing", "false")
     embeddedServer(Netty, port = 8080, host = "127.0.0.1", module = Application::module).start(wait = true)
 }

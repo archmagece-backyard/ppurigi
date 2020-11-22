@@ -22,7 +22,6 @@ class TestService {
             useNestedTransactions = true
         }
         transaction {
-            SchemaUtils.dropSchema()
             SchemaUtils.create (Scatter, Treasure, Hunter)
         }
     }

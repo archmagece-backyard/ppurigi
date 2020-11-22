@@ -12,7 +12,7 @@ import kotlin.test.Test
 class TestModel {
 
     @BeforeTest
-    fun before(){
+    fun before() {
         val dbType = ConfigFactory.load().getString("db_type")
         val config = ConfigFactory.load().getConfig(dbType)
         val properties = Properties()
@@ -23,14 +23,15 @@ class TestModel {
             useNestedTransactions = true
         }
         transaction {
-            SchemaUtils.dropSchema()
-            SchemaUtils.create (Scatter, Treasure, Hunter)
+            SchemaUtils.create(Scatter, Treasure, Hunter)
         }
     }
 
     @Test
     fun `test ppurigi model insert`() {
         transaction {
+            SchemaUtils.dropDatabase()
+            SchemaUtils.create(Scatter, Treasure, Hunter)
             val pRoomId = 1L
             val pUserId = 1L
             val pToken = "AAA"
