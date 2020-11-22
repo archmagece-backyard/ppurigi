@@ -21,7 +21,7 @@ object Treasure : LongIdTable(name = "t_treasure") {
     val amount = long("amount")
 }
 
-object Gather : LongIdTable(name = "t_gather") {
+object Hunter : LongIdTable(name = "t_gather") {
     val scatter = long("scatter").references(Scatter.id, onDelete = ReferenceOption.CASCADE)
     val treasure = long("treasure").references(Treasure.id, onDelete = ReferenceOption.CASCADE)
 

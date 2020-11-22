@@ -3,15 +3,13 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transactionManager
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import java.util.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class TestCRUD {
-    val db = initDB()
+class TestModel {
 
     @BeforeTest
     fun before(){
@@ -25,7 +23,7 @@ class TestCRUD {
             useNestedTransactions = true
         }
         transaction {
-            SchemaUtils.create (Scatter, Treasure, Gather)
+            SchemaUtils.create (Scatter, Treasure, Hunter)
         }
     }
 
@@ -51,7 +49,7 @@ class TestCRUD {
                 it[scatter] = scatterId1.value
                 it[amount] = amountForTreasure
             } get Treasure.id
-            Gather.insert {
+            Hunter.insert {
                 it[scatter] = scatterId1.value
                 it[treasure] = treasureId1.value
                 it[roomId] = pRoomId
