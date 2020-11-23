@@ -21,7 +21,7 @@ class TestModel {
         config.entrySet().forEach { e -> properties.setProperty(e.key, config.getString(e.key)) }
         val hikariConfig = HikariConfig(properties)
         val ds = HikariDataSource(hikariConfig)
-        val db = Database.connect(ds).apply {
+        Database.connect(ds).apply {
             useNestedTransactions = true
         }
         transaction {
@@ -87,6 +87,8 @@ class TestModel {
                     it[totalAmountOfMoney] = pTotalAmountOfMoney
                     it[totalNumberOfPeople] = pTotalNumberOfPeople
                 }
+                assertNotNull(scatterId1)
+                assertNotNull(scatterId2)
             }
         }
     }

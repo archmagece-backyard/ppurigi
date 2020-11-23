@@ -74,22 +74,38 @@ fun Application.module() {
     }
     install(StatusPages) {
         exception<IllegalArgumentException> {
-            call.respond(HttpStatusCode.BadRequest) {
+            call.respond(
+                HttpStatusCode.BadRequest,
                 ResponseWrapper(
-                    code = PpooStatusCode.PARAM.code,
-                    message = PpooStatusCode.PARAM.message,
+                    code = PpooStatusCode.FAIL.code,
+                    message = PpooStatusCode.FAIL.message,
                     data = ""
                 )
-            }
+            )
+//            call.respond(HttpStatusCode.BadRequest) {
+//                ResponseWrapper(
+//                    code = PpooStatusCode.FAIL.code,
+//                    message = PpooStatusCode.FAIL.message,
+//                    data = ""
+//                )
+//            }
         }
-        exception<PpooStatusException> {cause ->
-            call.respond(HttpStatusCode.OK) {
+        exception<PpooStatusException> { cause ->
+            call.respond(
+                HttpStatusCode.OK,
                 ResponseWrapper(
                     code = cause.statusCode.code,
                     message = cause.statusCode.message,
                     data = ""
                 )
-            }
+            )
+//            call.respond(HttpStatusCode.OK) {
+//                ResponseWrapper(
+//                    code = cause.statusCode.code,
+//                    message = cause.statusCode.message,
+//                    data = ""
+//                )
+//            }
         }
     }
 }

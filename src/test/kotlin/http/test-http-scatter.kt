@@ -12,7 +12,7 @@ class TestHttpScatter : TestBase() {
 
     @Test
     fun `뿌리기 생성 - header no room id`() = ppurigiServer {
-        val roomId = "R_ABC"
+//        val roomId = "R_ABC"
         val userId = 1
         handleRequest {
             method = HttpMethod.Post
@@ -28,7 +28,7 @@ class TestHttpScatter : TestBase() {
     @Test
     fun `뿌리기 생성 - header no user id`() = ppurigiServer {
         val roomId = "R_ABC"
-        val userId = 1
+//        val userId = 1
         handleRequest {
             method = HttpMethod.Post
             uri = Constants.URI_SCATTER
@@ -42,8 +42,8 @@ class TestHttpScatter : TestBase() {
 
     @Test
     fun `뿌리기 생성 - header no header`() = ppurigiServer {
-        val roomId = "R_ABC"
-        val userId = 1
+//        val roomId = "R_ABC"
+//        val userId = 1
         handleRequest {
             method = HttpMethod.Post
             uri = Constants.URI_SCATTER

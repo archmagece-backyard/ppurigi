@@ -56,6 +56,7 @@ class TestHttpScenario : TestBase() {
                     )
                 )
             }.apply {
+                println(response.content)
                 assertEquals(HttpStatusCode.OK, response.status())
             }
         }

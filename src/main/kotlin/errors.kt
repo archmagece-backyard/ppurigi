@@ -13,7 +13,7 @@ enum class PpooStatusCode(val code: String, val message: String) {
     INSPECTION_EXPIRES("I-01", "뿌린 건에 대한 조회는 7일 동안 할 수 있습니다"),
     INSPECTION_ROLE_FORBIDDEN("I-01", "뿌린 사람 자신만 조회를 할 수 있습니다."),
 
-    PARAM("E-01", "fail"),
+    FAIL("E-01", "fail"),
 
     UNKNOWN("Z-99", "unknown error"),
 }

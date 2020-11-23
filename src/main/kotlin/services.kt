@@ -62,7 +62,6 @@ class PpooService {
 
     fun gather(pRoomId: String, pUserId: Long, pToken: String): GatherResponse {
         logger.trace { "ppoo service.gather roomId: $pRoomId, userId: $pUserId, token: $pToken" }
-        var prizeAmount = 0L
         return transaction {
             val event = PpooEventTable.select {
                 (PpooEventTable.roomId eq pRoomId) and (PpooEventTable.token eq pToken)
