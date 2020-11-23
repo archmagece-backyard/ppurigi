@@ -39,7 +39,7 @@ class TestIntegration {
     @Test
     fun call_scatter() = ppurigiServer {
         transaction {
-            SchemaUtils.create(Scatter, Treasure, Hunter)
+            SchemaUtils.create(PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
         }
         val roomId = 1
         val userId = 1

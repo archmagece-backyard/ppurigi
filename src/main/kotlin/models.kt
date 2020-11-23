@@ -3,27 +3,26 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.jodatime.datetime
 
 
-object Scatter : LongIdTable(name = "t_scatter") {
+object PpooEventTable : LongIdTable(name = "t_ppoo_event") {
     val roomId = long("room_id")
     val userId = long("user_id")
-    val token = varchar("token", 3).uniqueIndex("idx_ppurigi_token_uniq")
+    val token = varchar("token", 3).uniqueIndex("idx_ppoo_event_token_uniq")
 
     val createdAt = datetime("created_at")
 
-    //    val amount = currency("currency")
     val totalAmountOfMoney = long("amount_of_money")
     val totalNumberOfPeople = long("number_of_people")
 }
 
-object Treasure : LongIdTable(name = "t_treasure") {
-    val scatter = long("scatter").references(Scatter.id, onDelete = ReferenceOption.CASCADE)
+object PpooPrizeTable : LongIdTable(name = "t_ppoo_prize") {
+    val event = long("event").references(PpooEventTable.id, onDelete = ReferenceOption.CASCADE)
 
     val amount = long("amount")
 }
 
-object Hunter : LongIdTable(name = "t_hunter") {
-    val scatter = long("scatter").references(Scatter.id, onDelete = ReferenceOption.CASCADE)
-    val treasure = long("treasure").references(Treasure.id, onDelete = ReferenceOption.CASCADE)
+object PpooPrizewinnerTable : LongIdTable(name = "t_ppoo_prizewinner") {
+    val event = long("event").references(PpooEventTable.id, onDelete = ReferenceOption.CASCADE)
+    val prize = long("prize").references(PpooPrizeTable.id, onDelete = ReferenceOption.CASCADE)
 
     val roomId: Column<Long> = long("room_id")
     val userId: Column<Long> = long("user_id")

@@ -1,7 +1,6 @@
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
-import io.ktor.config.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import mu.KotlinLogging
@@ -19,7 +18,7 @@ class TestHttp {
     @Test
     fun call_scatter() = ppurigiServer {
         transaction {
-            SchemaUtils.create(Scatter, Treasure, Hunter)
+            SchemaUtils.create(PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
         }
         val roomId = 1
         val userId = 1

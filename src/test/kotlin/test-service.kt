@@ -22,7 +22,7 @@ class TestService {
             useNestedTransactions = true
         }
         transaction {
-            SchemaUtils.create (Scatter, Treasure, Hunter)
+            SchemaUtils.create (PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
         }
     }
 

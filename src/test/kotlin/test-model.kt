@@ -23,7 +23,7 @@ class TestModel {
             useNestedTransactions = true
         }
         transaction {
-            SchemaUtils.create(Scatter, Treasure, Hunter)
+            SchemaUtils.create(PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
         }
     }
 
@@ -31,13 +31,13 @@ class TestModel {
     fun `test ppurigi model insert`() {
         transaction {
             SchemaUtils.dropDatabase()
-            SchemaUtils.create(Scatter, Treasure, Hunter)
+            SchemaUtils.create(PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
             val pRoomId = 1L
             val pUserId = 1L
             val pToken = "AAA"
             val pTotalAmountOfMoney = 10000L
             val pTotalNumberOfPeople = 3L
-            val scatterId1 = Scatter.insertAndGetId {
+            val scatterId1 = PpooEventTable.insertAndGetId {
                 it[roomId] = pRoomId
                 it[userId] = pUserId
                 it[token] = pToken
@@ -47,13 +47,13 @@ class TestModel {
             }
             println(pTotalAmountOfMoney / pTotalNumberOfPeople)
             val amountForTreasure = pTotalAmountOfMoney / pTotalNumberOfPeople
-            val treasureId1 = Treasure.insert {
-                it[scatter] = scatterId1.value
+            val treasureId1 = PpooPrizeTable.insert {
+                it[event] = scatterId1.value
                 it[amount] = amountForTreasure
-            } get Treasure.id
-            Hunter.insert {
-                it[scatter] = scatterId1.value
-                it[treasure] = treasureId1.value
+            } get PpooPrizeTable.id
+            PpooPrizewinnerTable.insert {
+                it[event] = scatterId1.value
+                it[prize] = treasureId1.value
                 it[roomId] = pRoomId
                 it[userId] = pUserId
                 it[createdAt] = DateTime.now(DateTimeZone.UTC)
