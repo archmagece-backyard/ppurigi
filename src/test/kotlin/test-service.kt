@@ -38,11 +38,14 @@ class TestService {
 
     @Test
     fun `ppurigi service - single success case`() {
-        val pRoomId = "R_ABC"
-        val pUserId = 1L
-        val rToken = ppooService.scatter(pRoomId, pUserId, 10000, 3)
-        ppooService.gather(pRoomId, pUserId, rToken)
-        ppooService.inspection(pRoomId, pUserId, rToken)
+        val roomId = "R_ABC"
+        val ownerUserId = 1L
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
+
+        val hunterUserId = 2L
+        ppooService.gather(roomId, hunterUserId, token)
+        ppooService.inspection(roomId, ownerUserId, token)
     }
 
     @Test
@@ -71,7 +74,8 @@ class TestService {
     fun `ppurigi service - 정상케이스 - owner가 생선 같은방의 hunter가 1회 받아감`() {
         val roomId = "AA1"
         val ownerUserId = 2L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val hunterUserId = 3L
         val amount = ppooService.gather(roomId, hunterUserId, token)
@@ -82,7 +86,8 @@ class TestService {
     fun `ppurigi service - 상품을 3개 생성한걸 4번 받아감`() {
         val roomId = "AA1"
         val ownerUserId = 1L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val hunterUserId2 = 2L
         val gatherResponse2 = ppooService.gather(roomId, hunterUserId2, token)
@@ -109,7 +114,8 @@ class TestService {
     fun `ppurigi service - 한 방에서 뿌린걸 다른방에서 접근`() {
         val roomId = "AA1"
         val ownerUserId = 2L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val userId = 3L
         ppooService.gather(roomId, userId, token)
@@ -122,7 +128,8 @@ class TestService {
     fun `ppurigi service - 이벤트 Owner가 이벤트 참여`() {
         val roomId = "AA1"
         val ownerUserId = 2L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         assertFailsWith<PpooStatusException> {
             ppooService.gather(roomId, ownerUserId, token)
@@ -133,7 +140,8 @@ class TestService {
     fun `ppurigi service - 한 사용자가 두번 받으러 접근`() {
         val roomId = "AA1"
         val ownerUserId = 2L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val userId = 3L
         val gatherResponse1 = ppooService.gather(roomId, userId, token)
@@ -146,7 +154,8 @@ class TestService {
     fun `ppurigi service - 10분 지난 뿌리기를 받으려고 요청`() {
         val roomId = "AA1"
         val ownerUserId = 2L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         transaction {
             PpooEventTable.update({ PpooEventTable.roomId.eq(roomId) and PpooEventTable.token.eq(token)}) {
@@ -171,7 +180,8 @@ class TestService {
     fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 owner가 확인`() {
         val roomId = "AA1"
         val ownerUserId = 1L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val userId = 3L
         val gatherResponse = ppooService.gather(roomId, userId, token)
@@ -184,7 +194,8 @@ class TestService {
     fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 owner가 확인 2명이 받았을 때 금액 변화 확인`() {
         val roomId = "AA1"
         val ownerUserId = 1L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val userId1 = 3L
         val gatherResponse1 = ppooService.gather(roomId, userId1, token)
@@ -204,7 +215,8 @@ class TestService {
     fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 user4 확인 2명이 받았을 때 금액 변화 확인`() {
         val roomId = "AA1"
         val ownerUserId = 1L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val userId1 = 3L
         val gatherResponse1 = ppooService.gather(roomId, userId1, token)
@@ -221,7 +233,8 @@ class TestService {
     fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 다른사람(user4) 확인 2명이 받았을 때`() {
         val roomId = "AA1"
         val ownerUserId = 1L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val userId1 = 3L
         val gatherResponse1 = ppooService.gather(roomId, userId1, token)
@@ -238,7 +251,8 @@ class TestService {
     fun `ppurigi service - AA1 방에서 owner가 조회기간7일 이후에 조회`() {
         val roomId = "AA1"
         val ownerUserId = 1L
-        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val scatterResponse = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+        val token = scatterResponse.token
 
         val userId1 = 3L
         val gatherResponse1 = ppooService.gather(roomId, userId1, token)

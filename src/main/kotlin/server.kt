@@ -57,7 +57,6 @@ fun Application.module() {
         }
     }
     install(ContentNegotiation) {
-        val EXCLUDE = arrayOf("serialVersionUID")
         gson {
             setDateFormat(DateFormat.LONG)
             setPrettyPrinting()
@@ -92,30 +91,15 @@ fun Application.module() {
                     data = ""
                 )
             )
-//            call.respond(HttpStatusCode.BadRequest) {
-//                ResponseWrapper(
-//                    code = PpooStatusCode.FAIL.code,
-//                    message = PpooStatusCode.FAIL.message,
-//                    data = ""
-//                )
-//            }
         }
         exception<PpooStatusException> { cause ->
-            call.respond(
-                HttpStatusCode.OK,
+            call.respond(HttpStatusCode.OK) {
                 ResponseWrapper(
                     code = cause.statusCode.code,
                     message = cause.statusCode.message,
                     data = ""
                 )
-            )
-//            call.respond(HttpStatusCode.OK) {
-//                ResponseWrapper(
-//                    code = cause.statusCode.code,
-//                    message = cause.statusCode.message,
-//                    data = ""
-//                )
-//            }
+            }
         }
     }
 }

@@ -30,14 +30,16 @@ fun Route.ppurigi(ppurigiService: PpooService) {
 
             logger.debug { "API scatter - roomId: $roomId, userId: $userId, requestDto : $requestDto" }
 
-            val token =
-                ppurigiService.scatter(roomId, userId, requestDto.totalAmountOfMoney, requestDto.totalNumberOfPeople)
-
             call.respond(
                 HttpStatusCode.Created, ResponseWrapper(
                     code = PpooStatusCode.SUCCESS.code,
                     message = PpooStatusCode.SUCCESS.message,
-                    data = ScatterResponse(token = token)
+                    data = ppurigiService.scatter(
+                        roomId,
+                        userId,
+                        requestDto.totalAmountOfMoney,
+                        requestDto.totalNumberOfPeople
+                    )
                 )
             )
         }
