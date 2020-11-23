@@ -25,6 +25,7 @@ class PpooService {
         val ppooEvents = PpooEventTable.select {
             PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(pUserId)
         }.map { it[PpooEventTable.token] }
+        // 10번 반복한다고뭐가 달라질까.. 중복확률을 낮추는 임시처리
         for (i in 0..10) {
             if (!ppooEvents.contains(vToken)) {
                 break
@@ -44,7 +45,7 @@ class PpooService {
             it[totalNumberOfPeople] = pTotalNumberOfPeople
         }
         // FIXME 분배방식 여러가지??
-        // 엔빵으로 나눠주고 마지막에 잔돈 넣어주기
+        // 엔빵으로 나눠주고 마지막 하나는 아래로 빼서 잔돈 넣어주기
         for (i in 0 until pTotalNumberOfPeople - 1) {
             PpooPrizeTable.insert {
                 it[event] = scatterId.value
@@ -104,8 +105,7 @@ class PpooService {
         val results = ((PpooEventTable leftJoin PpooPrizeTable) leftJoin PpooPrizewinnerTable).select {
             PpooEventTable.token.eq(pToken) and PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(
                 pUserId
-            ) and
-                    (PpooPrizewinnerTable.id.isNotNull())
+            ) and (PpooPrizewinnerTable.id.isNotNull())
 
         }.toList()//.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.INSPECTION_ROLE_FORBIDDEN)
         if (results.isEmpty()) {

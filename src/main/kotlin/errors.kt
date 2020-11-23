@@ -12,7 +12,7 @@ enum class PpooStatusCode(val code: String, val message: String) {
     GATHER_FINISHED("G-05", "상금이 다 떨어졌습니다."),
 
     // inspection
-    INSPECTION_NO_DATA("I-01", "요청하신 데이터가 없습니다"),
+//    INSPECTION_NO_DATA("I-01", "요청하신 데이터가 없습니다"),
     INSPECTION_EXPIRES("I-02", "뿌린 건에 대한 조회는 7일 동안 할 수 있습니다"),
     INSPECTION_ROLE_FORBIDDEN("I-03", "뿌린 사람 자신만 조회를 할 수 있습니다."),
 
@@ -21,6 +21,4 @@ enum class PpooStatusCode(val code: String, val message: String) {
     UNKNOWN("Z-99", "unknown error"),
 }
 
-class AuthorizationException : Exception()
-
-class PpooStatusException(val statusCode: PpooStatusCode) : IllegalArgumentException(statusCode.message)
+class PpooStatusException(val statusCode: PpooStatusCode) : Exception(statusCode.message)

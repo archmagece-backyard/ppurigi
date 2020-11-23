@@ -6,9 +6,7 @@ object DBMigration {
         val flyway = Flyway()
         val dbType = ConfigFactory.load().getString("db_type")
         val config = ConfigFactory.load().getConfig(dbType)
-//        val config = ConfigFactory.load().let {
-//            it.getConfig(it.getString("db_type"))
-//        }
+
         flyway.setDataSource(
             config.getString("jdbcUrl"),
             config.getString("username"),
