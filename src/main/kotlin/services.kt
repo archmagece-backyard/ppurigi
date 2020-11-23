@@ -35,7 +35,7 @@ class PpooService {
                 vToken = generateToken()
             }
             if (ppooEvents.contains(vToken)) {
-                throw PpooStatusException(PpooStatusCode.TOKEN_ISSUE_FAIL)
+                throw PpooStatusException(PpooStatusCode.SCATTER_TOKEN_ISSUE_FAIL)
             }
 
             val scatterId = PpooEventTable.insertAndGetId {
