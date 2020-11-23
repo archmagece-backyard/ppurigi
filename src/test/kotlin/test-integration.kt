@@ -13,7 +13,7 @@ class TestIntegration {
         const val IMAGE_NAME = "mariadb"
         const val TAG_NAME = "10"
         val databaseServer: MariadbContainerAdapter = MariadbContainerAdapter("$IMAGE_NAME:$TAG_NAME")
-            .withDatabaseName("test-db")
+            .withDatabaseName("test_db")
             .withUsername("user01")
             .withPassword("pass01")
     }
@@ -45,7 +45,7 @@ class TestIntegration {
         val roomId = "R_ABC"
         val userId = 1
         logger.debug { "Running Ppurigi Http Test" }
-        handleRequest(HttpMethod.Post, "/ppurigi/scatter") {
+        handleRequest(HttpMethod.Post, Constants.URI_SCATTER) {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             addHeader("X-ROOM-ID", roomId)
             addHeader("X-USER-ID", userId.toString())
@@ -62,7 +62,7 @@ class TestIntegration {
             val turnsType = object : TypeToken<ResponseWrapper<ScatterResponse>>() {}.type
             val scatterResponse = gson.fromJson<ResponseWrapper<ScatterResponse>>(response.content, turnsType)
             val token = scatterResponse.data.token
-            handleRequest(HttpMethod.Post, "/ppurigi/gather/$token") {
+            handleRequest(HttpMethod.Post, "${Constants.URI_GATHER}/$token") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 addHeader("X-ROOM-ID", roomId.toString())
                 addHeader("X-USER-ID", userId.toString())
@@ -70,7 +70,7 @@ class TestIntegration {
                 assertEquals(HttpStatusCode.Accepted, response.status())
                 assertNotNull(response.content)
             }
-            handleRequest(HttpMethod.Get, "/ppurigi/inspection/$token") {
+            handleRequest(HttpMethod.Get, "${Constants.URI_INSPECTION}/$token") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 addHeader("X-ROOM-ID", roomId.toString())
                 addHeader("X-USER-ID", userId.toString())

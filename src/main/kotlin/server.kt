@@ -4,10 +4,13 @@ import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.gson.*
+import io.ktor.http.*
 import io.ktor.metrics.dropwizard.*
 import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -40,7 +43,7 @@ fun Application.module() {
     install(Compression)
     install(DefaultHeaders)
     install(CallLogging) {
-        filter { call -> !call.request.path().startsWith("/ppurigi/health") }
+        filter { call -> !call.request.path().startsWith(Constants.URI_HEALTH) }
         level = Level.TRACE
         mdc("executionId") {
             UUID.randomUUID().toString()
@@ -69,6 +72,26 @@ fun Application.module() {
 
     install(Routing) {
         ppurigi(ppurigiService)
+    }
+    install(StatusPages) {
+        exception<IllegalArgumentException> {
+            call.respond(HttpStatusCode.BadRequest) {
+                ResponseWrapper(
+                    code = ErrorCode.PARAM.code,
+                    message = ErrorCode.PARAM.message,
+                    data = ""
+                )
+            }
+        }
+        exception<AuthorizationException> {
+            call.respond(HttpStatusCode.Unauthorized) {
+                ResponseWrapper(
+                    code = ErrorCode.NO_AUTH.code,
+                    message = ErrorCode.NO_AUTH.message,
+                    data = ""
+                )
+            }
+        }
     }
 }
 

@@ -16,10 +16,10 @@ fun ppurigiHeader(call: ApplicationCall): Pair<String, Long> {
 fun Route.ppurigi(ppurigiService: PpurigiService) {
     val logger = KotlinLogging.logger { }
 
-    get("/health") {
+    get(Constants.URI_HEALTH) {
         call.respond(hashMapOf("healthy" to ppurigiService.ping()))
     }
-    route("/ppurigi") {
+    route(Constants.URI_BASE) {
         post("/scatter") {
             val (roomId, userId) = ppurigiHeader(call)
             val requestDto = call.receive<ScatterRequest>()
@@ -28,9 +28,9 @@ fun Route.ppurigi(ppurigiService: PpurigiService) {
                 ppurigiService.scatter(roomId, userId, requestDto.totalAmountOfMoney, requestDto.totalNumberOfPeople)
 
             call.respond(
-                HttpStatusCode.Created, ResponseWrapper<ScatterResponse>(
-                    code = "PASS",
-                    message = "success",
+                HttpStatusCode.Created, ResponseWrapper(
+                    code = ErrorCode.SUCCESS.code,
+                    message = ErrorCode.SUCCESS.message,
                     data = ScatterResponse(token = token)
                 )
             )
