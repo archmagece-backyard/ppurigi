@@ -25,12 +25,12 @@
 
 * kotlin
 * ktor
-* requery
+* exposed
 * gradle
 * redis
-* mysql
+* mariadb
 * docker
-* junit5
+* junit
 
 
 ## 테스트 형태

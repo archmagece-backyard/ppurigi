@@ -38,6 +38,8 @@ dependencies {
 //    implementation 'org.slf4j:slf4j-nop:1.7.30'
     // <- maria
     implementation 'com.google.guava:guava:22.0'
+    // data, validator
+    implementation "org.hibernate.validator:hibernate-validator:6.1.1.Final"
 
     // ktor
     implementation "io.ktor:ktor-server-core:$ktor_version"
@@ -65,11 +67,7 @@ dependencies {
     implementation "org.jetbrains.exposed:exposed-money:$exposed_version"
     implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
 }
-//sourceSets {
-//    main.java.srcDirs = []
-//    main.kotlin.srcDirs = ['src/main/java', 'src/main/kotlin']
-//    main.resources.srcDirs = ['src/main/resources']
-//}
+
 compileKotlin {
     kotlinOptions.jvmTarget = '11'
 }
