@@ -29,13 +29,13 @@ class TestService {
     }
 
     @Test
-    fun `ppurigi service test`() {
+    fun `ppurigi service - `() {
         val pRoomId = "R_ABC"
         val pUserId = 1L
-        val ppurigiService = PpurigiService()
-        val rToken = ppurigiService.scatter(pRoomId, pUserId, 10000, 3)
-        ppurigiService.gather(pRoomId, pUserId, rToken)
-        ppurigiService.inspect(pRoomId, pUserId, rToken)
+        val ppooService = PpooService()
+        val rToken = ppooService.scatter(pRoomId, pUserId, 10000, 3)
+        ppooService.gather(pRoomId, pUserId, rToken)
+        ppooService.inspection(pRoomId, pUserId, rToken)
     }
 
 }

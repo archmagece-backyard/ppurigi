@@ -5,7 +5,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import mu.KotlinLogging
 
-fun ppurigiHeader(call: ApplicationCall): Pair<String, Long> {
+fun ppooHeader(call: ApplicationCall): Pair<String, Long> {
     val roomId = call.request.header("X-ROOM-ID")?.toString()
         ?: throw IllegalArgumentException("X-ROOM-ID must be provided")
     val userId = call.request.header("X-USER-ID")?.toLong()
@@ -13,16 +13,22 @@ fun ppurigiHeader(call: ApplicationCall): Pair<String, Long> {
     return Pair(roomId, userId)
 }
 
-fun Route.ppurigi(ppurigiService: PpurigiService) {
+fun ppooToken(call: ApplicationCall) =
+    call.parameters["token"] ?: throw IllegalArgumentException("Path variable token not found")
+
+fun Route.ppurigi(ppurigiService: PpooService) {
     val logger = KotlinLogging.logger { }
 
     get(Constants.URI_HEALTH) {
+        logger.debug { "API ping" }
         call.respond(hashMapOf("healthy" to ppurigiService.ping()))
     }
     route(Constants.URI_BASE) {
         post("/scatter") {
-            val (roomId, userId) = ppurigiHeader(call)
+            val (roomId, userId) = ppooHeader(call)
             val requestDto = call.receive<ScatterRequest>()
+
+            logger.debug { "API scatter - roomId: $roomId, userId: $userId, requestDto : $requestDto" }
 
             val token =
                 ppurigiService.scatter(roomId, userId, requestDto.totalAmountOfMoney, requestDto.totalNumberOfPeople)
@@ -36,17 +42,20 @@ fun Route.ppurigi(ppurigiService: PpurigiService) {
             )
         }
         post("/gather/{token}") {
-            val (roomId, userId) = ppurigiHeader(call)
-            val token = call.parameters["token"] ?: throw IllegalArgumentException("Path variable token not found")
+            val (roomId, userId) = ppooHeader(call)
+            val token = ppooToken(call)
+
+            logger.debug { "API gather - roomId: $roomId, userId: $userId, token : $token" }
 
             call.respond(HttpStatusCode.Accepted, ppurigiService.gather(roomId, userId, token))
         }
         get("/inspection/{token}") {
-            val (roomId, userId) = ppurigiHeader(call)
-            val token = call.parameters["token"] ?: throw IllegalArgumentException("Path variable token not found")
+            val (roomId, userId) = ppooHeader(call)
+            val token = ppooToken(call)
 
-            logger.debug { "token : $token" }
-            call.respond(HttpStatusCode.OK, ppurigiService.inspect(roomId, userId, token))
+            logger.debug { "API inspection - roomId: $roomId, userId: $userId, token : $token" }
+
+            call.respond(HttpStatusCode.OK, ppurigiService.inspection(roomId, userId, token))
         }
     }
 }

@@ -4,7 +4,6 @@ import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.http.*
@@ -68,7 +67,7 @@ fun Application.module() {
     initDB(initConfig())
 //    dbMigrate()
 
-    val ppurigiService = PpurigiService()
+    val ppurigiService = PpooService()
 
     install(Routing) {
         ppurigi(ppurigiService)
