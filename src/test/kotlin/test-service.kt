@@ -109,9 +109,9 @@ class TestService {
         val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
 
         val userId = 3L
-        val amount1 = ppooService.gather(roomId, userId, token)
+        val gatherResponse1 = ppooService.gather(roomId, userId, token)
         assertFailsWith<PpooStatusException> {
-            val amount2 = ppooService.gather(roomId, userId, token)
+            val gatherResponse2 = ppooService.gather(roomId, userId, token)
         }
     }
 
@@ -128,7 +128,7 @@ class TestService {
         }
 
         val userId = 3L
-        val amount1 = ppooService.gather(roomId, userId, token)
+        val gatherResponse1 = ppooService.gather(roomId, userId, token)
 
         transaction {
             PpooEventTable.update({ PpooEventTable.roomId.eq(roomId) and PpooEventTable.token.eq(token)}) {
@@ -136,17 +136,95 @@ class TestService {
             }
         }
         assertFailsWith<PpooStatusException> {
-            val amount2 = ppooService.gather(roomId, userId, token)
+            val gatherResponse2 = ppooService.gather(roomId, userId, token)
         }
     }
 
     @Test
-    fun `ppurigi service - AAA 방에서 뿌린걸 AAA방에서 접근하고 AAA방에서 만든사람이 확인`() {
+    fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 owner가 확인`() {
+        val roomId = "AA1"
+        val ownerUserId = 1L
+        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
 
+        val userId = 3L
+        val gatherResponse = ppooService.gather(roomId, userId, token)
+
+        val inspectionResponse = ppooService.inspection(roomId, ownerUserId, token)
+        println(inspectionResponse)
     }
 
     @Test
-    fun `ppurigi service - AAA 방에서 뿌린걸 AAA방에서 접근하고 AAA방에서 다른 사람이 확인`() {
+    fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 owner가 확인 2명이 받았을 때 금액 변화 확인`() {
+        val roomId = "AA1"
+        val ownerUserId = 1L
+        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
 
+        val userId1 = 3L
+        val gatherResponse1 = ppooService.gather(roomId, userId1, token)
+        val inspectionResponse1 = ppooService.inspection(roomId, ownerUserId, token)
+
+        val userId2 = 4L
+        val gatherResponse2 = ppooService.gather(roomId, userId2, token)
+        val inspectionResponse2 = ppooService.inspection(roomId, ownerUserId, token)
+
+        println(inspectionResponse1)
+        println(inspectionResponse2)
+        assert(inspectionResponse1.gathers.size + 1 == inspectionResponse2.gathers.size)
+        assert(inspectionResponse1.sumAmountGathered < inspectionResponse2.sumAmountGathered)
     }
+
+    @Test
+    fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 user4 확인 2명이 받았을 때 금액 변화 확인`() {
+        val roomId = "AA1"
+        val ownerUserId = 1L
+        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+
+        val userId1 = 3L
+        val gatherResponse1 = ppooService.gather(roomId, userId1, token)
+        val inspectionResponse1 = ppooService.inspection(roomId, ownerUserId, token)
+
+        assertFailsWith<PpooStatusException>{
+            val userId2 = 4L
+            val gatherResponse2 = ppooService.gather(roomId, userId2, token)
+            val inspectionResponse2 = ppooService.inspection(roomId, userId2, token)
+        }
+    }
+
+    @Test
+    fun `ppurigi service - AA1 방에서 owner가 뿌린걸 같은 방에서 다른사람(user4) 확인 2명이 받았을 때`() {
+        val roomId = "AA1"
+        val ownerUserId = 1L
+        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+
+        val userId1 = 3L
+        val gatherResponse1 = ppooService.gather(roomId, userId1, token)
+        val inspectionResponse1 = ppooService.inspection(roomId, ownerUserId, token)
+
+        assertFailsWith<PpooStatusException>{
+            val userId2 = 4L
+            val gatherResponse2 = ppooService.gather(roomId, userId2, token)
+            val inspectionResponse2 = ppooService.inspection(roomId, userId2, token)
+        }
+    }
+
+    @Test
+    fun `ppurigi service - AA1 방에서 owner가 조회기간7일 이후에 조회`() {
+        val roomId = "AA1"
+        val ownerUserId = 1L
+        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+
+        val userId1 = 3L
+        val gatherResponse1 = ppooService.gather(roomId, userId1, token)
+        val inspectionResponse1 = ppooService.inspection(roomId, ownerUserId, token)
+
+        transaction {
+            PpooEventTable.update({ PpooEventTable.roomId.eq(roomId) and PpooEventTable.token.eq(token)}) {
+                it[PpooEventTable.createdAt] = DateTime.now(DateTimeZone.UTC).minusDays(7)
+            }
+        }
+        assertFailsWith<PpooStatusException> {
+            val inspectionResponse2 = ppooService.inspection(roomId, ownerUserId, token)
+        }
+    }
+
 }

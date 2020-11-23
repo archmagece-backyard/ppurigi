@@ -1,8 +1,5 @@
 import mu.KotlinLogging
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -63,19 +60,19 @@ class PpooService {
     }
 
 
-    fun gather(pRoomId: String, pUserId: Long, pToken: String): Long {
+    fun gather(pRoomId: String, pUserId: Long, pToken: String): GatherResponse {
         logger.trace { "ppoo service.gather roomId: $pRoomId, userId: $pUserId, token: $pToken" }
         var prizeAmount = 0L
-        transaction {
+        return transaction {
             val event = PpooEventTable.select {
                 (PpooEventTable.roomId eq pRoomId) and (PpooEventTable.token eq pToken)
-            }.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.NOT_EXISTS)
+            }.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.GATHER_NOT_EXISTS)
 
             if (event[PpooEventTable.userId] == pUserId) {
-                throw PpooStatusException(PpooStatusCode.ROLE_FORBIDDEN)
+                throw PpooStatusException(PpooStatusCode.GATHER_ROLE_FORBIDDEN)
             }
             if (event[PpooEventTable.createdAt] < DateTime.now(DateTimeZone.UTC).minusMinutes(10)) {
-                throw PpooStatusException(PpooStatusCode.EXPIRES)
+                throw PpooStatusException(PpooStatusCode.GATHER_EXPIRES)
             }
 
             val prizeDupe = PpooPrizewinnerTable.select {
@@ -83,12 +80,12 @@ class PpooService {
                         (PpooPrizewinnerTable.userId.eq(pUserId))
             }.firstOrNull()
             if (prizeDupe != null) {
-                throw PpooStatusException(PpooStatusCode.DUPLICATE)
+                throw PpooStatusException(PpooStatusCode.GATHER_DUPLICATE)
             }
             val prize = (PpooPrizeTable leftJoin PpooPrizewinnerTable).select {
                 (PpooPrizeTable.event eq event[PpooEventTable.id].value) and
                         (PpooPrizewinnerTable.id.isNull())
-            }.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.FINISHED)
+            }.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.GATHER_FINISHED)
             PpooPrizewinnerTable.insert {
                 it[PpooPrizewinnerTable.event] = event[PpooEventTable.id].value
                 it[PpooPrizewinnerTable.prize] = prize[PpooPrizeTable.id].value
@@ -96,22 +93,40 @@ class PpooService {
                 it[PpooPrizewinnerTable.userId] = pUserId
                 it[PpooPrizewinnerTable.createdAt] = DateTime.now(DateTimeZone.UTC)
             }
-            prizeAmount = prize[PpooPrizeTable.amount]
+            GatherResponse(
+                amountGathered = prize[PpooPrizeTable.amount],
+                userId = pUserId,
+            )
         }
-        return prizeAmount
     }
 
 
-    fun inspection(pRoomId: String, pUserId: Long, pToken: String) {
+    fun inspection(pRoomId: String, pUserId: Long, pToken: String): InspectionResponse {
         logger.trace { "ppoo service.inspection roomId: $pRoomId, userId: $pUserId, token: $pToken" }
-        transaction {
-            ((PpooEventTable leftJoin PpooPrizeTable) leftJoin PpooPrizewinnerTable).select {
-                PpooEventTable.token.eq(pToken) and PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(
-                    pUserId
-                )
-            }.forEach {
-                println(it[PpooEventTable.userId])
+        return transaction {
+            val results = ((PpooEventTable leftJoin PpooPrizeTable) leftJoin PpooPrizewinnerTable).select {
+                PpooEventTable.token.eq(pToken) and PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(pUserId) and
+                        (PpooPrizewinnerTable.id.isNotNull())
+
+            }.toList()//.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.INSPECTION_ROLE_FORBIDDEN)
+            if (results.isEmpty()){
+                throw PpooStatusException(PpooStatusCode.INSPECTION_ROLE_FORBIDDEN)
             }
+
+            if (results[0][PpooEventTable.createdAt] < DateTime.now(DateTimeZone.UTC).minusDays(7)) {
+                throw PpooStatusException(PpooStatusCode.INSPECTION_EXPIRES)
+            }
+            InspectionResponse(
+                createdAt = results[0][PpooEventTable.createdAt],
+                totalAmountOfMoney = results[0][PpooEventTable.totalAmountOfMoney],
+                sumAmountGathered = results.sumOf { it[PpooPrizeTable.amount] },
+                gathers = results.map{
+                    GatherResponse(
+                        amountGathered = it[PpooPrizeTable.amount],
+                        userId = it[PpooPrizewinnerTable.userId],
+                    )
+                }
+            )
         }
     }
 }
