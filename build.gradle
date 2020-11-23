@@ -3,6 +3,8 @@ plugins {
     id 'application'
     id 'java'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'co.uzzu.dotenv.gradle' version '1.1.0'
+    id 'org.flywaydb.flyway' version '7.2.1'
 }
 group = 'me.kakaopay'
 version = '1.0-SNAPSHOT'
@@ -39,9 +41,9 @@ dependencies {
     // <- maria
     implementation 'com.google.guava:guava:22.0'
     // data, validator
-    implementation "org.hibernate.validator:hibernate-validator:6.1.1.Final"
+    implementation 'org.hibernate.validator:hibernate-validator:6.1.1.Final'
     // gson, serializer
-    implementation "com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.8.0"
+    implementation 'com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.8.0'
 
     // ktor
     implementation "io.ktor:ktor-server-core:$ktor_version"
@@ -74,4 +76,11 @@ compileKotlin {
 }
 application {
     mainClassName = 'ServerKt'
+}
+
+flyway {
+    url = System.env.JDBC_URL ?: 'jdbc:h2:mem:test'
+    user = System.env.DB_USER ?: 'sa'
+    password = System.env.DB_PASS ?: ''
+    createSchemas = true
 }
