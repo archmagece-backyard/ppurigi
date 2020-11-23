@@ -12,6 +12,8 @@ class TestService {
 
     @BeforeTest
     fun before(){
+        System.setProperty("testing", "true")
+        System.setProperty("db_type", "h2")
         val dbType = ConfigFactory.load().getString("db_type")
         val config = ConfigFactory.load().getConfig(dbType)
         val properties = Properties()
@@ -28,7 +30,7 @@ class TestService {
 
     @Test
     fun `ppurigi service test`() {
-        val pRoomId = 1L
+        val pRoomId = "R_ABC"
         val pUserId = 1L
         val ppurigiService = PpurigiService()
         val rToken = ppurigiService.scatter(pRoomId, pUserId, 10000, 3)

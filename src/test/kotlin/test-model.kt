@@ -13,6 +13,8 @@ class TestModel {
 
     @BeforeTest
     fun before() {
+        System.setProperty("testing", "true")
+        System.setProperty("db_type", "h2")
         val dbType = ConfigFactory.load().getString("db_type")
         val config = ConfigFactory.load().getConfig(dbType)
         val properties = Properties()
@@ -32,7 +34,7 @@ class TestModel {
         transaction {
             SchemaUtils.dropDatabase()
             SchemaUtils.create(PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
-            val pRoomId = 1L
+            val pRoomId = "R_ABC"
             val pUserId = 1L
             val pToken = "AAA"
             val pTotalAmountOfMoney = 10000L

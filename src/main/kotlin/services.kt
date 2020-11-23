@@ -1,9 +1,11 @@
 import mu.KotlinLogging
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
-import java.lang.Exception
 
 class PpurigiService {
 
@@ -17,7 +19,7 @@ class PpurigiService {
         }
     }
 
-    fun scatter(pRoomId: Long, pUserId: Long, pTotalAmountOfMoney: Long, pTotalNumberOfPeople: Long): String {
+    fun scatter(pRoomId: String, pUserId: Long, pTotalAmountOfMoney: Long, pTotalNumberOfPeople: Long): String {
         val vToken = generateToken()
         transaction {
             val scatterId = PpooEventTable.insertAndGetId {
@@ -44,10 +46,10 @@ class PpurigiService {
     }
 
 
-    fun gather(p_roomId: Long, p_userId: Long, p_token: String) {
+    fun gather(pRoomId: String, pUserId: Long, pToken: String) {
         transaction {
             val scatter = PpooEventTable.select {
-                (PpooEventTable.roomId eq p_roomId) and (PpooEventTable.userId eq p_userId) and (PpooEventTable.token eq p_token)
+                (PpooEventTable.roomId eq pRoomId) and (PpooEventTable.userId eq pUserId) and (PpooEventTable.token eq pToken)
             }.firstOrNull() ?: throw Exception("요청한 값이 없음")
             val treasureList = (PpooPrizeTable leftJoin PpooPrizewinnerTable).select {
                 (PpooPrizeTable.event eq scatter[PpooEventTable.id].value) and
@@ -60,10 +62,12 @@ class PpurigiService {
     }
 
 
-    fun inspect(pRoomId: Long, pUserId: Long, pToken: String) {
+    fun inspect(pRoomId: String, pUserId: Long, pToken: String) {
         transaction {
             ((PpooEventTable leftJoin PpooPrizeTable) leftJoin PpooPrizewinnerTable).select {
-                PpooEventTable.token.eq(pToken) and PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(pUserId)
+                PpooEventTable.token.eq(pToken) and PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(
+                    pUserId
+                )
             }.forEach {
                 println(it[PpooEventTable.userId])
             }

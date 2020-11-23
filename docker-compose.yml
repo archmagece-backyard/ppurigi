@@ -9,11 +9,14 @@ services:
       - dev-network
     environment:
       - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=dev_db
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
+    deploy:
+      replicas: 2
     ports:
       - "8080:8080"
     networks:

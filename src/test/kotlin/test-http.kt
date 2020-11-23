@@ -20,12 +20,12 @@ class TestHttp {
         transaction {
             SchemaUtils.create(PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
         }
-        val roomId = 1
+        val roomId = "R_ABC"
         val userId = 1
         logger.debug { "Running Ppurigi Http Test" }
         handleRequest(HttpMethod.Post, "/ppurigi/scatter") {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            addHeader("X-ROOM-ID", roomId.toString())
+            addHeader("X-ROOM-ID", roomId)
             addHeader("X-USER-ID", userId.toString())
             setBody(
                 gson.toJson(
@@ -66,6 +66,8 @@ class TestHttp {
     }
 
     private fun ppurigiServer(callback: TestApplicationEngine.() -> Unit) {
+        System.setProperty("testing", "true")
+        System.setProperty("db_type", "h2")
         withTestApplication(Application::module) { callback() }
     }
 }

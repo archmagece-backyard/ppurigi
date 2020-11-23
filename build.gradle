@@ -2,6 +2,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
     id 'application'
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 group = 'me.kakaopay'
 version = '1.0-SNAPSHOT'
@@ -24,7 +25,6 @@ dependencies {
     // test, container
     testImplementation "org.testcontainers:testcontainers:$testcontainer_version"
     testImplementation "org.testcontainers:mariadb:$testcontainer_version"
-//    testImplementation 'org.apache.commons:commons-lang:2.6'
 
     // datasource
     implementation 'com.zaxxer:HikariCP:3.4.5'
@@ -67,7 +67,6 @@ dependencies {
     implementation "org.jetbrains.exposed:exposed-money:$exposed_version"
     implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
 }
-
 compileKotlin {
     kotlinOptions.jvmTarget = '11'
 }

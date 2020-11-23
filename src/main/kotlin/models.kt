@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.jodatime.datetime
 
 
 object PpooEventTable : LongIdTable(name = "t_ppoo_event") {
-    val roomId = long("room_id")
+    val roomId = varchar("room_id", 30)
     val userId = long("user_id")
     val token = varchar("token", 3).uniqueIndex("idx_ppoo_event_token_uniq")
 
@@ -24,7 +24,7 @@ object PpooPrizewinnerTable : LongIdTable(name = "t_ppoo_prizewinner") {
     val event = long("event").references(PpooEventTable.id, onDelete = ReferenceOption.CASCADE)
     val prize = long("prize").references(PpooPrizeTable.id, onDelete = ReferenceOption.CASCADE)
 
-    val roomId: Column<Long> = long("room_id")
+    val roomId = varchar("room_id", 30)
     val userId: Column<Long> = long("user_id")
     val createdAt = datetime("created_at")
 }

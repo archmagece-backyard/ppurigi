@@ -1,17 +1,12 @@
 import io.ktor.application.*
-import io.ktor.client.utils.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.pipeline.*
 import mu.KotlinLogging
-import java.lang.Exception
-import java.lang.IllegalArgumentException
-import kotlin.math.log
 
-fun ppurigiHeader(call: ApplicationCall) : Pair<Long,Long> {
-    val roomId = call.request.header("X-ROOM-ID")?.toLong()
+fun ppurigiHeader(call: ApplicationCall): Pair<String, Long> {
+    val roomId = call.request.header("X-ROOM-ID")?.toString()
         ?: throw IllegalArgumentException("X-ROOM-ID must be provided")
     val userId = call.request.header("X-USER-ID")?.toLong()
         ?: throw IllegalArgumentException("X-USER-ID must be provided")
