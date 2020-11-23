@@ -35,8 +35,8 @@ fun Route.ppurigi(ppurigiService: PpooService) {
 
             call.respond(
                 HttpStatusCode.Created, ResponseWrapper(
-                    code = ErrorCode.SUCCESS.code,
-                    message = ErrorCode.SUCCESS.message,
+                    code = PpooStatusCode.SUCCESS.code,
+                    message = PpooStatusCode.SUCCESS.message,
                     data = ScatterResponse(token = token)
                 )
             )

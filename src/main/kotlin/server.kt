@@ -76,17 +76,17 @@ fun Application.module() {
         exception<IllegalArgumentException> {
             call.respond(HttpStatusCode.BadRequest) {
                 ResponseWrapper(
-                    code = ErrorCode.PARAM.code,
-                    message = ErrorCode.PARAM.message,
+                    code = PpooStatusCode.PARAM.code,
+                    message = PpooStatusCode.PARAM.message,
                     data = ""
                 )
             }
         }
-        exception<AuthorizationException> {
-            call.respond(HttpStatusCode.Unauthorized) {
+        exception<PpooStatusException> {cause ->
+            call.respond(HttpStatusCode.OK) {
                 ResponseWrapper(
-                    code = ErrorCode.NO_AUTH.code,
-                    message = ErrorCode.NO_AUTH.message,
+                    code = cause.statusCode.code,
+                    message = cause.statusCode.message,
                     data = ""
                 )
             }

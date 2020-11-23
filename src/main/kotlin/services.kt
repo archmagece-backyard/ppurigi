@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 
 class PpooService {
 
@@ -22,13 +23,25 @@ class PpooService {
 
     fun scatter(pRoomId: String, pUserId: Long, pTotalAmountOfMoney: Long, pTotalNumberOfPeople: Long): String {
         logger.trace { "ppoo service.scatter roomId: $pRoomId, userId: $pUserId, money: $pTotalAmountOfMoney, people: $pTotalNumberOfPeople" }
-        val vToken = generateToken()
+        var vToken = generateToken()
         transaction {
-            // FIXME check duplicate
+            val ppooEvents = PpooEventTable.select {
+                PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(pUserId)
+            }.map { it[PpooEventTable.token] }
+            for (i in 0..10) {
+                if (!ppooEvents.contains(vToken)) {
+                    break
+                }
+                vToken = generateToken()
+            }
+            if (ppooEvents.contains(vToken)) {
+                throw PpooStatusException(PpooStatusCode.TOKEN_ISSUE_FAIL)
+            }
+
             val scatterId = PpooEventTable.insertAndGetId {
                 it[roomId] = pRoomId
                 it[userId] = pUserId
-                it[token] = generateToken()
+                it[token] = vToken
                 it[createdAt] = DateTime.now()
                 it[totalAmountOfMoney] = pTotalAmountOfMoney
                 it[totalNumberOfPeople] = pTotalNumberOfPeople
@@ -50,20 +63,42 @@ class PpooService {
     }
 
 
-    fun gather(pRoomId: String, pUserId: Long, pToken: String) {
+    fun gather(pRoomId: String, pUserId: Long, pToken: String): Long {
         logger.trace { "ppoo service.gather roomId: $pRoomId, userId: $pUserId, token: $pToken" }
+        var prizeAmount = 0L
         transaction {
-            val scatter = PpooEventTable.select {
-                (PpooEventTable.roomId eq pRoomId) and (PpooEventTable.userId eq pUserId) and (PpooEventTable.token eq pToken)
-            }.firstOrNull() ?: throw IllegalAccessError("요청한 값이 없습니다")
-            val treasureList = (PpooPrizeTable leftJoin PpooPrizewinnerTable).select {
-                (PpooPrizeTable.event eq scatter[PpooEventTable.id].value) and
-                        (PpooPrizewinnerTable.id.isNull())
-            }.toList()
-            treasureList.forEach {
-                it[PpooPrizeTable.id]
+            val event = PpooEventTable.select {
+                (PpooEventTable.roomId eq pRoomId) and (PpooEventTable.token eq pToken)
+            }.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.NOT_EXISTS)
+
+            if (event[PpooEventTable.userId] == pUserId) {
+                throw PpooStatusException(PpooStatusCode.ROLE_FORBIDDEN)
             }
+            if (event[PpooEventTable.createdAt] < DateTime.now(DateTimeZone.UTC).minusMinutes(10)) {
+                throw PpooStatusException(PpooStatusCode.EXPIRES)
+            }
+
+            val prizeDupe = PpooPrizewinnerTable.select {
+                PpooPrizewinnerTable.event.eq(event[PpooEventTable.id].value) and
+                        (PpooPrizewinnerTable.userId.eq(pUserId))
+            }.firstOrNull()
+            if (prizeDupe != null) {
+                throw PpooStatusException(PpooStatusCode.DUPLICATE)
+            }
+            val prize = (PpooPrizeTable leftJoin PpooPrizewinnerTable).select {
+                (PpooPrizeTable.event eq event[PpooEventTable.id].value) and
+                        (PpooPrizewinnerTable.id.isNull())
+            }.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.FINISHED)
+            PpooPrizewinnerTable.insert {
+                it[PpooPrizewinnerTable.event] = event[PpooEventTable.id].value
+                it[PpooPrizewinnerTable.prize] = prize[PpooPrizeTable.id].value
+                it[PpooPrizewinnerTable.roomId] = pRoomId
+                it[PpooPrizewinnerTable.userId] = pUserId
+                it[PpooPrizewinnerTable.createdAt] = DateTime.now(DateTimeZone.UTC)
+            }
+            prizeAmount = prize[PpooPrizeTable.amount]
         }
+        return prizeAmount
     }
 
 
