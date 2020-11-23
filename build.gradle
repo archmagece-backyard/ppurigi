@@ -78,9 +78,10 @@ application {
     mainClassName = 'ServerKt'
 }
 
-flyway {
-    url = System.env.JDBC_URL ?: 'jdbc:h2:mem:test'
-    user = System.env.DB_USER ?: 'sa'
-    password = System.env.DB_PASS ?: ''
-    createSchemas = true
-}
+// not support mariadb
+//flyway {
+//    url = System.env.JDBC_URL ?: 'jdbc:h2:mem:test'
+//    user = System.env.DB_USER ?: 'sa'
+//    password = System.env.DB_PASS ?: ''
+//    createSchemas = true
+//}

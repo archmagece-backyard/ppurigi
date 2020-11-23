@@ -15,8 +15,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    deploy:
-      replicas: 2
+#    deploy:
+#      replicas: 2
     ports:
       - "8080:8080"
     networks:

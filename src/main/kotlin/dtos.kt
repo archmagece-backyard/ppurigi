@@ -34,11 +34,11 @@ data class GatherResponse(
     val userId: Long,
 )
 
-data class InspectionRequest(
-    @field:Size(min = 0, max = 3)
-    @field:NotNull
-    val token: String,
-)
+//data class InspectionRequest(
+//    @field:Size(min = 0, max = 3)
+//    @field:NotNull
+//    val token: String,
+//)
 
 
 data class InspectionResponse(
