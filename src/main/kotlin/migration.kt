@@ -10,11 +10,11 @@ object DBMigration {
 //            it.getConfig(it.getString("db_type"))
 //        }
         flyway.setDataSource(
-            config.getString("dataSource.url"),
-            config.getString("dataSource.user"),
-            config.getString("dataSource.password"),
+            config.getString("jdbcUrl"),
+            config.getString("username"),
+            config.getString("password"),
         )
-        flyway.setSchemas("t_scatter", "t_treasure", "t_hunter")
+        flyway.setSchemas("t_ppoo_event", "t_ppoo_prize", "t_ppoo_prizewinner")
         flyway.setLocations("db/migration/$dbType")
         flyway.migrate()
     }

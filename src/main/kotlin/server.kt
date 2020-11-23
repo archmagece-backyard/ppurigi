@@ -1,6 +1,4 @@
 import com.codahale.metrics.Slf4jReporter
-import com.google.gson.ExclusionStrategy
-import com.google.gson.FieldAttributes
 import com.google.gson.JsonSerializer
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -16,8 +14,9 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.sessions.*
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.slf4j.event.Level
 import java.lang.reflect.Modifier
@@ -40,12 +39,17 @@ fun initDB(baseConfig: Config) {
 }
 
 fun dbMigrate() {
-    DBMigration.migrate()
+    // FIXME cli로 이동 할 필요
+//    DBMigration.migrate()
+    transaction {
+        SchemaUtils.create(PpooEventTable, PpooPrizeTable, PpooPrizewinnerTable)
+    }
 }
 
-val serializer: JsonSerializer<DateTime> = JsonSerializer { src, typeOfSrc, context ->
+val serializer: JsonSerializer<DateTime> = JsonSerializer { src, _, context ->
     context.serialize(src.millis)
 }
+
 fun Application.module() {
     install(Compression)
     install(DefaultHeaders)
@@ -74,7 +78,7 @@ fun Application.module() {
     }
 
     initDB(initConfig())
-//    dbMigrate()
+    dbMigrate()
 
     val ppurigiService = PpooService()
 
@@ -92,15 +96,26 @@ fun Application.module() {
                 )
             )
         }
+        // 문법체크
         exception<PpooStatusException> { cause ->
-            call.respond(HttpStatusCode.OK) {
+            call.respond(
+                HttpStatusCode.OK,
                 ResponseWrapper(
                     code = cause.statusCode.code,
                     message = cause.statusCode.message,
                     data = ""
                 )
-            }
+            )
         }
+//        exception<PpooStatusException> { cause ->
+//            call.respond(HttpStatusCode.OK) {
+//                ResponseWrapper(
+//                    code = cause.statusCode.code,
+//                    message = cause.statusCode.message,
+//                    data = ""
+//                )
+//            }
+//        }
     }
 }
 

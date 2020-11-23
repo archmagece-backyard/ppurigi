@@ -9,6 +9,7 @@ RUN ./gradlew --no-daemon clean build -x test shadowJar
 
 FROM openjdk:${VERSION}-jre
 
+# TODO migration
 COPY --from=BUILD /src/build/libs/kakaopay-ppurigi-1.0-SNAPSHOT-all.jar /bin/runner/run.jar
 WORKDIR /bin/runner
 
