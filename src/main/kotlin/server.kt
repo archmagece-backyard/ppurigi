@@ -1,4 +1,7 @@
 import com.codahale.metrics.Slf4jReporter
+import com.google.gson.ExclusionStrategy
+import com.google.gson.FieldAttributes
+import com.google.gson.JsonSerializer
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariConfig
@@ -13,7 +16,9 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.sessions.*
 import org.jetbrains.exposed.sql.Database
+import org.joda.time.DateTime
 import org.slf4j.event.Level
 import java.lang.reflect.Modifier
 import java.text.DateFormat
@@ -38,6 +43,9 @@ fun dbMigrate() {
     DBMigration.migrate()
 }
 
+val serializer: JsonSerializer<DateTime> = JsonSerializer { src, typeOfSrc, context ->
+    context.serialize(src.millis)
+}
 fun Application.module() {
     install(Compression)
     install(DefaultHeaders)
@@ -49,10 +57,12 @@ fun Application.module() {
         }
     }
     install(ContentNegotiation) {
+        val EXCLUDE = arrayOf("serialVersionUID")
         gson {
             setDateFormat(DateFormat.LONG)
             setPrettyPrinting()
             excludeFieldsWithModifiers(Modifier.TRANSIENT)
+            registerTypeAdapter(DateTime::class.java, serializer)
         }
     }
     install(DropwizardMetrics) {

@@ -40,6 +40,8 @@ dependencies {
     implementation 'com.google.guava:guava:22.0'
     // data, validator
     implementation "org.hibernate.validator:hibernate-validator:6.1.1.Final"
+    // gson, serializer
+    implementation "com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.8.0"
 
     // ktor
     implementation "io.ktor:ktor-server-core:$ktor_version"

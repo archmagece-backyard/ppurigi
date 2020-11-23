@@ -1,5 +1,8 @@
 import mu.KotlinLogging
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -45,7 +48,7 @@ class PpooService {
             }
             // FIXME 분배방식 여러가지??
             // 엔빵으로 나눠주고 마지막에 잔돈 넣어주기
-            for (i in 0 until pTotalNumberOfPeople) {
+            for (i in 0 until pTotalNumberOfPeople - 1) {
                 PpooPrizeTable.insert {
                     it[event] = scatterId.value
                     it[amount] = (pTotalAmountOfMoney / pTotalNumberOfPeople)
@@ -104,11 +107,13 @@ class PpooService {
         logger.trace { "ppoo service.inspection roomId: $pRoomId, userId: $pUserId, token: $pToken" }
         return transaction {
             val results = ((PpooEventTable leftJoin PpooPrizeTable) leftJoin PpooPrizewinnerTable).select {
-                PpooEventTable.token.eq(pToken) and PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(pUserId) and
+                PpooEventTable.token.eq(pToken) and PpooEventTable.roomId.eq(pRoomId) and PpooEventTable.userId.eq(
+                    pUserId
+                ) and
                         (PpooPrizewinnerTable.id.isNotNull())
 
             }.toList()//.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.INSPECTION_ROLE_FORBIDDEN)
-            if (results.isEmpty()){
+            if (results.isEmpty()) {
                 throw PpooStatusException(PpooStatusCode.INSPECTION_ROLE_FORBIDDEN)
             }
 
@@ -119,7 +124,7 @@ class PpooService {
                 createdAt = results[0][PpooEventTable.createdAt],
                 totalAmountOfMoney = results[0][PpooEventTable.totalAmountOfMoney],
                 sumAmountGathered = results.sumOf { it[PpooPrizeTable.amount] },
-                gathers = results.map{
+                gathers = results.map {
                     GatherResponse(
                         amountGathered = it[PpooPrizeTable.amount],
                         userId = it[PpooPrizewinnerTable.userId],

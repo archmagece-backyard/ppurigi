@@ -15,14 +15,15 @@ import kotlin.test.assertNotNull
 class TestHttpScenario : TestBase() {
 
     @Test
-    fun call_scatter() = ppurigiServer {
+    fun `성공적으로 호출하는 시나리오`() = ppurigiServer {
         val roomId = "R_ABC"
-        val userId = 1
+        val ownerId = 1L
+        val hunterId = 2L
         logger.debug { "Running Ppurigi Http Test" }
         handleRequest(HttpMethod.Post, Constants.URI_SCATTER) {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             addHeader("X-ROOM-ID", roomId)
-            addHeader("X-USER-ID", userId.toString())
+            addHeader("X-USER-ID", ownerId.toString())
             setBody(
                 gson.toJson(
                     ScatterRequest(
@@ -39,7 +40,7 @@ class TestHttpScenario : TestBase() {
             handleRequest(HttpMethod.Post, "${Constants.URI_GATHER}/$token") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 addHeader("X-ROOM-ID", roomId)
-                addHeader("X-USER-ID", userId.toString())
+                addHeader("X-USER-ID", hunterId.toString())
             }.apply {
                 assertEquals(HttpStatusCode.Accepted, response.status())
                 assertNotNull(response.content)
@@ -47,7 +48,7 @@ class TestHttpScenario : TestBase() {
             handleRequest(HttpMethod.Get, "${Constants.URI_INSPECTION}/$token") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 addHeader("X-ROOM-ID", roomId)
-                addHeader("X-USER-ID", userId.toString())
+                addHeader("X-USER-ID", ownerId.toString())
                 setBody(
                     gson.toJson(
                         GatherRequest(

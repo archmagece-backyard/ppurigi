@@ -79,6 +79,33 @@ class TestService {
     }
 
     @Test
+    fun `ppurigi service - 상품을 3개 생성한걸 4번 받아감`() {
+        val roomId = "AA1"
+        val ownerUserId = 1L
+        val token = ppooService.scatter(roomId, ownerUserId, 10000, 3)
+
+        val hunterUserId2 = 2L
+        val gatherResponse2 = ppooService.gather(roomId, hunterUserId2, token)
+        assertNotNull(gatherResponse2)
+        val hunterUserId3 = 3L
+        val gatherResponse3 = ppooService.gather(roomId, hunterUserId3, token)
+        assertNotNull(gatherResponse3)
+        val hunterUserId4 = 4L
+        val gatherResponse4 = ppooService.gather(roomId, hunterUserId4, token)
+        assertNotNull(gatherResponse4)
+        assertFailsWith<PpooStatusException> {
+            val hunterUserId5 = 5L
+            val gatherResponse5 = ppooService.gather(roomId, hunterUserId5, token)
+            assertNotNull(gatherResponse5)
+        }
+//        val hunterUserId6 = 6L
+//        val gatherResponse6 = ppooService.gather(roomId, hunterUserId6, token)
+//        assertNotNull(gatherResponse6)
+        val inspectionResponse = ppooService.inspection(roomId, ownerUserId, token)
+        assertNotNull(inspectionResponse)
+    }
+
+    @Test
     fun `ppurigi service - 한 방에서 뿌린걸 다른방에서 접근`() {
         val roomId = "AA1"
         val ownerUserId = 2L
