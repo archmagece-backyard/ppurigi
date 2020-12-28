@@ -78,10 +78,8 @@ class PpooService {
         val prizeDupe = PpooPrizewinnerTable.select {
             PpooPrizewinnerTable.event.eq(event[PpooEventTable.id].value) and
                     (PpooPrizewinnerTable.userId.eq(pUserId))
-        }.firstOrNull()
-        if (prizeDupe != null) {
-            throw PpooStatusException(PpooStatusCode.GATHER_DUPLICATE)
-        }
+        }.firstOrNull() ?: throw PpooStatusException(PpooStatusCode.GATHER_NOT_EXISTS)
+
         val prize = (PpooPrizeTable leftJoin PpooPrizewinnerTable).select {
             (PpooPrizeTable.event eq event[PpooEventTable.id].value) and
                     (PpooPrizewinnerTable.id.isNull())

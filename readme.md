@@ -19,7 +19,7 @@
 * gradle
 * mariadb
 * docker
-* junit
+* junit4
 
 
 ## 테스트
